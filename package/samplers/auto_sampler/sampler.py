@@ -83,13 +83,13 @@ class AutoSampler(BaseSampler):
         constraints_func: Callable[[FrozenTrial], Sequence[float]] | None = None,
     ) -> None:
         self._rng = LazyRandomState(seed)
-        seed_for_random_sampler = self._rng.rng.randint(MAXINT32)
-        self._sampler: BaseSampler = RandomSampler(seed=seed_for_random_sampler)
+        self._sampler: dict[int, BaseSampler] = {}
         self._constraints_func = constraints_func
 
     def reseed_rng(self) -> None:
         self._rng.rng.seed()
-        self._sampler.reseed_rng()
+        for sampler in self._sampler.values():
+            sampler.reseed_rng()
 
     def _include_conditional_param(self, study: Study) -> bool:
         trials = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE, TrialState.PRUNED))
@@ -102,11 +102,11 @@ class AutoSampler(BaseSampler):
     def _determine_multi_objective_sampler(
         self, study: Study, trial: FrozenTrial, search_space: dict[str, BaseDistribution]
     ) -> BaseSampler:
-        if isinstance(self._sampler, (NSGAIISampler, NSGAIIISampler)):
-            return self._sampler
-
         seed = self._rng.rng.randint(MAXINT32)
-        if not isinstance(self._sampler, TPESampler):
+
+        complete_trials = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE,))
+        complete_trials.sort(key=lambda trial: trial.datetime_complete)
+        if len(complete_trials) < self._N_COMPLETE_TRIALS_FOR_NSGA:
             return TPESampler(
                 seed=seed,
                 multivariate=True,
@@ -115,26 +115,19 @@ class AutoSampler(BaseSampler):
                 constant_liar=True,
             )
 
-        complete_trials = study.get_trials(deepcopy=False, states=(TrialState.COMPLETE,))
-        complete_trials.sort(key=lambda trial: trial.datetime_complete)
-        if len(complete_trials) >= self._N_COMPLETE_TRIALS_FOR_NSGA:
-            nsga_sampler_cls = (
-                NSGAIISampler
-                if len(study.directions) < THRESHOLD_OF_MANY_OBJECTIVES
-                else NSGAIIISampler
-            )
-            # Use NSGA-II/III if len(complete_trials) <= _N_COMPLETE_TRIALS_FOR_NSGA.
-            return nsga_sampler_cls(constraints_func=self._constraints_func, seed=seed)
-
-        return self._sampler  # No update happens to self._sampler.
+        nsga_sampler_cls = (
+            NSGAIISampler
+            if len(study.directions) < THRESHOLD_OF_MANY_OBJECTIVES
+            else NSGAIIISampler
+        )
+        # Use NSGA-II/III if len(complete_trials) >= _N_COMPLETE_TRIALS_FOR_NSGA.
+        return nsga_sampler_cls(constraints_func=self._constraints_func, seed=seed)
 
     def _determine_single_objective_sampler(
         self, study: Study, trial: FrozenTrial, search_space: dict[str, BaseDistribution]
     ) -> BaseSampler:
-        if isinstance(self._sampler, TPESampler):
-            return self._sampler
-
         seed = self._rng.rng.randint(MAXINT32)
+
         if (
             self._constraints_func is not None
             or any(isinstance(d, CategoricalDistribution) for d in search_space.values())
@@ -156,24 +149,24 @@ class AutoSampler(BaseSampler):
         if len(complete_trials) < self._N_COMPLETE_TRIALS_FOR_CMAES:
             # Use ``GPSampler`` if search space is numerical and
             # len(complete_trials) < _N_COMPLETE_TRIALS_FOR_CMAES.
-            if not isinstance(self._sampler, GPSampler):
-                return GPSampler(seed=seed)
-        elif not isinstance(self._sampler, CmaEsSampler):
-            # Use ``CmaEsSampler`` if search space is numerical and
-            # len(complete_trials) > _N_COMPLETE_TRIALS_FOR_CMAES.
-            # Warm start CMA-ES with the first _N_COMPLETE_TRIALS_FOR_CMAES complete trials.
-            warm_start_trials = complete_trials[: self._N_COMPLETE_TRIALS_FOR_CMAES]
-            # NOTE(nabenabe): ``CmaEsSampler`` internally falls back to ``RandomSampler`` for
-            # 1D problems.
-            return CmaEsSampler(
-                seed=seed, source_trials=warm_start_trials, warn_independent_sampling=False
-            )
+            return GPSampler(seed=seed)
 
-        return self._sampler  # No update happens to self._sampler.
+        # Use ``CmaEsSampler`` if search space is numerical and
+        # len(complete_trials) > _N_COMPLETE_TRIALS_FOR_CMAES.
+        # Warm start CMA-ES with the first _N_COMPLETE_TRIALS_FOR_CMAES complete trials.
+        warm_start_trials = complete_trials[: self._N_COMPLETE_TRIALS_FOR_CMAES]
+        # NOTE(nabenabe): ``CmaEsSampler`` internally falls back to ``RandomSampler`` for
+        # 1D problems.
+        return CmaEsSampler(
+            seed=seed, source_trials=warm_start_trials, warn_independent_sampling=False
+        )
 
-    def _determine_sampler(
-        self, study: Study, trial: FrozenTrial, search_space: dict[str, BaseDistribution]
-    ) -> BaseSampler:
+    def _determine_sampler(self, study: Study, trial: FrozenTrial) -> BaseSampler:
+        states_of_interest = [TrialState.COMPLETE, TrialState.WAITING]
+        if len(study._get_trials(deepcopy=False, states=states_of_interest)) == 0:
+            return RandomSampler(seed=self._rng.rng.randint(MAXINT32))
+
+        search_space = IntersectionSearchSpace().calculate(study)
         if len(study.directions) == 1:
             return self._determine_single_objective_sampler(study, trial, search_space)
         else:
@@ -182,24 +175,26 @@ class AutoSampler(BaseSampler):
     def infer_relative_search_space(
         self, study: Study, trial: FrozenTrial
     ) -> dict[str, BaseDistribution]:
-        return self._sampler.infer_relative_search_space(study, trial)
+        return self._sampler[trial._trial_id].infer_relative_search_space(study, trial)
 
     def sample_relative(
         self, study: Study, trial: FrozenTrial, search_space: dict[str, BaseDistribution]
     ) -> dict[str, Any]:
         n_objectives = len(study.directions)
-        if n_objectives > 1 and isinstance(self._sampler, TPESampler):
-            # NOTE(nabenabe): Set generation 0 so that NSGA-II/III can use the trial information
-            # obtained during the optimization using TPESampler.
-            # NOTE(nabenabe): Use NSGA-III for many objective problems.
-            _GENERATION_KEY = (
-                NSGA2_GENERATION_KEY
-                if n_objectives < THRESHOLD_OF_MANY_OBJECTIVES
-                else NSGA3_GENERATION_KEY
-            )
+        # NOTE(nabenabe): Set generation 0 so that NSGA-II/III can use the trial information
+        # obtained during the optimization using other samplers.
+        # NOTE(nabenabe): Use NSGA-III for many objective problems.
+        _GENERATION_KEY = (
+            NSGA2_GENERATION_KEY
+            if n_objectives < THRESHOLD_OF_MANY_OBJECTIVES
+            else NSGA3_GENERATION_KEY
+        )
+        if n_objectives > 1 and not isinstance(
+            self._sampler[trial._trial_id], (NSGAIISampler, NSGAIIISampler)
+        ):
             study._storage.set_trial_system_attr(trial._trial_id, _GENERATION_KEY, 0)
 
-        return self._sampler.sample_relative(study, trial, search_space)
+        return self._sampler[trial._trial_id].sample_relative(study, trial, search_space)
 
     def sample_independent(
         self,
@@ -208,18 +203,17 @@ class AutoSampler(BaseSampler):
         param_name: str,
         param_distribution: BaseDistribution,
     ) -> Any:
-        return self._sampler.sample_independent(study, trial, param_name, param_distribution)
+        return self._sampler[trial._trial_id].sample_independent(
+            study, trial, param_name, param_distribution
+        )
 
     def before_trial(self, study: Study, trial: FrozenTrial) -> None:
-        states_of_interest = [TrialState.COMPLETE, TrialState.WAITING]
-        if len(study._get_trials(deepcopy=False, states=states_of_interest)) != 0:
-            search_space = IntersectionSearchSpace().calculate(study)
-            self._sampler = self._determine_sampler(study, trial, search_space)
+        self._sampler[trial._trial_id] = self._determine_sampler(study, trial)
 
         study._storage.set_trial_system_attr(
-            trial._trial_id, SAMPLER_KEY, self._sampler.__class__.__name__
+            trial._trial_id, SAMPLER_KEY, self._sampler[trial._trial_id].__class__.__name__
         )
-        self._sampler.before_trial(study, trial)
+        self._sampler[trial._trial_id].before_trial(study, trial)
 
     def after_trial(
         self,
@@ -229,9 +223,13 @@ class AutoSampler(BaseSampler):
         values: Sequence[float] | None,
     ) -> None:
         assert state in [TrialState.COMPLETE, TrialState.FAIL, TrialState.PRUNED]
-        if isinstance(self._sampler, RandomSampler) and self._constraints_func is not None:
+        if (
+            isinstance(self._sampler[trial._trial_id], RandomSampler)
+            and self._constraints_func is not None
+        ):
             # NOTE(nabenabe): Since RandomSampler does not handle constraints, we need to
             # separately set the constraints here.
             _process_constraints_after_trial(self._constraints_func, study, trial, state)
 
-        self._sampler.after_trial(study, trial, state, values)
+        self._sampler[trial._trial_id].after_trial(study, trial, state, values)
+        del self._sampler[trial._trial_id]

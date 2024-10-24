@@ -30,6 +30,7 @@ $ pip install optunahub cmaes torch scipy
 ## Example
 
 ```python
+import optuna
 import optunahub
 
 
