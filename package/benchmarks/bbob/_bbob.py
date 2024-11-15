@@ -46,6 +46,9 @@ class Problem:
             function_id: Function index in [1, 24].
             dimension: Dimension of the problem in [2, 3, 5, 10, 20, 40].
             instance_id: Instance index in [1, 80].
+
+        Please refer to the COCO documentation for the details of the available properties.
+        https://numbbo.github.io/coco-doc/apidocs/cocoex/cocoex.Problem.html
         """
 
         assert 1 <= function_id <= 24, "function_id must be in [1, 24]"
