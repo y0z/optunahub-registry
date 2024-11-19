@@ -48,7 +48,7 @@ class Problem(optunahub.benchmarks.BaseProblem):
         Args:
             function_id: Function index in [1, 24].
             dimension: Dimension of the problem in [2, 3, 5, 10, 20, 40].
-            instance_id: Instance index in [1, 80].
+            instance_id: Instance index in [1, 15].
 
         Please refer to the COCO documentation for the details of the available properties.
         https://numbbo.github.io/coco-doc/apidocs/cocoex/cocoex.Problem.html
@@ -56,7 +56,7 @@ class Problem(optunahub.benchmarks.BaseProblem):
 
         assert 1 <= function_id <= 24, "function_id must be in [1, 24]"
         assert dimension in [2, 3, 5, 10, 20, 40], "dimension must be in [2, 3, 5, 10, 20, 40]"
-        assert 1 <= instance_id <= 80, "instance_id must be in [1, 80]"
+        assert 1 <= instance_id <= 15, "instance_id must be in [1, 15]"
 
         self._problem = ex.Suite(
             "bbob",
@@ -78,13 +78,13 @@ class Problem(optunahub.benchmarks.BaseProblem):
 
     @property
     def directions(self) -> Sequence[optuna.study.StudyDirection]:
-        """Return the optimization direction."""
+        """Return the optimization directions."""
         return [optuna.study.StudyDirection.MINIMIZE]
 
     def evaluate(self, params: dict[str, Any]) -> float:
         """Evaluate the objective function.
         Args:
-            x: Decision variable.
+            params: Decision variable.
         Returns:
             The objective value.
         """
