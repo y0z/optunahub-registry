@@ -5,9 +5,10 @@ from typing import Sequence
 
 import cocoex as ex
 import optuna
+import optunahub
 
 
-class Problem:
+class Problem(optunahub.benchmarks.BaseProblem):
     """Wrapper class for COCO bbob test suite.
     https://numbbo.github.io/coco/testsuites/bbob
 
@@ -63,6 +64,33 @@ class Problem:
             f"function_indices:{function_id} dimensions:{dimension} instance_indices:{instance_id}",
         )[0]
 
+    # BaseProblem properties
+    @property
+    def search_space(self) -> dict[str, optuna.distributions.BaseDistribution]:
+        """Return the search space."""
+        return {
+            f"x{i}": optuna.distributions.FloatDistribution(
+                low=self._problem.lower_bounds[i],
+                high=self._problem.upper_bounds[i],
+            )
+            for i in range(self._problem.dimension)
+        }
+
+    @property
+    def directions(self) -> Sequence[optuna.study.StudyDirection]:
+        """Return the optimization direction."""
+        return [optuna.study.StudyDirection.MINIMIZE]
+
+    def evaluate(self, params: dict[str, Any]) -> float:
+        """Evaluate the objective function.
+        Args:
+            x: Decision variable.
+        Returns:
+            The objective value.
+        """
+        return self._problem(list(params.values()))
+
+    # Additional problem-specific properties
     @property
     def coco_problem(self) -> ex.Problem:
         """Return the COCO problem instance."""
@@ -70,27 +98,3 @@ class Problem:
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._problem, name)
-
-    def __call__(self, trial: optuna.Trial) -> float:
-        """Objective function for Optuna.
-        Args:
-            trial: Optuna trial object.
-        Returns:
-            The objective value.
-        """
-        x = [
-            trial.suggest_float(
-                f"x{i}", self._problem.lower_bounds[i], self._problem.upper_bounds[i]
-            )
-            for i in range(self._problem.dimension)
-        ]
-        return self._problem(x)
-
-    def evaluate(self, x: Sequence[float]) -> float:
-        """Evaluate the objective function.
-        Args:
-            x: Decision variable.
-        Returns:
-            The objective value.
-        """
-        return self._problem(x)
