@@ -64,11 +64,11 @@ Please refer to [the paper](https://numbbo.github.io/gforge/downloads/download16
 
 **Category**
 
-- 1 Separable Functions
-- 2 Functions with low or moderate conditioning
-- 3 Functions with high conditioning and unimodal
-- 4 Multi-modal functions with adequate global structure
-- 5 Multi-modal functions with weak global structure
+1. Separable Functions
+1. Functions with low or moderate conditioning
+1. Functions with high conditioning and unimodal
+1. Multi-modal functions with adequate global structure
+1. Multi-modal functions with weak global structure
 
 | Category  | Function ID | Function Name                                            |
 |-----------|-------------|----------------------------------------------------------|
