@@ -60,6 +60,8 @@ print(study.best_trial.params, study.best_trial.value)
 
 ## List of Benchmark Functions
 
+Please refer to [the paper](https://numbbo.github.io/gforge/downloads/download16.00/bbobdocfunctions.pdf) for details about each benchmark function.
+
 **Category**
 
 - 1 Separable Functions
