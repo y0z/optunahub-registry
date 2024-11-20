@@ -19,7 +19,7 @@ The blackbox optimization benchmarking (bbob) test suite comprises 24 noiseless 
 - `dimension`: Dimension of the benchmark function. It must be in `[2, 3, 5, 10, 20, 40]`.
 - `instance_id`: ID of the instance of the benchmark function. It must be in the range of `[1, 15]`.
 
-#### Methods and Prorperties
+#### Methods and Properties
 
 - `search_space`: Return the search space.
   - Return type: `dict[str, optuna.distributions.BaseDistribution]`
