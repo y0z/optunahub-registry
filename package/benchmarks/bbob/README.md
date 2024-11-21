@@ -25,9 +25,9 @@ The blackbox optimization benchmarking (bbob) test suite comprises 24 noiseless 
   - Return type: `dict[str, optuna.distributions.BaseDistribution]`
 - `direction`: Return the optimization direction.
   - Return type: `optuna.study.StudyDirection`
-- `evaluate(params: dict[str, Any])`: Evaluate the objective function.
+- `evaluate(params: dict[str, float])`: Evaluate the objective function.
   - Parameters:
-    - `params`: Decision variable.
+    - `params`: Decision variable like `{"x0": x1_value, "x1": x1_value, ..., "xn": xn_value}`. The number of parameters must be equal to `dimension`.
   - Return type: `float`
 - `coco_problem`: Return the COCO problem instance.
   - Return type: `cocoex.Problem`

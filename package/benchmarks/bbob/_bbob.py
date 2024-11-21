@@ -81,7 +81,7 @@ class Problem(optunahub.benchmarks.BaseProblem):
         """Return the optimization directions."""
         return [optuna.study.StudyDirection.MINIMIZE]
 
-    def evaluate(self, params: dict[str, Any]) -> float:
+    def evaluate(self, params: dict[str, float]) -> float:
         """Evaluate the objective function.
         Args:
             params: Decision variable.
