@@ -8,7 +8,7 @@ import optuna
 import optunahub
 
 
-class Problem(optunahub.benchmarks.BaseProblem):
+class Problem(optunahub.benchmarks.SimpleBaseProblem):
     """Wrapper class for COCO bbob test suite.
     https://numbbo.github.io/coco/testsuites/bbob
 
@@ -63,18 +63,18 @@ class Problem(optunahub.benchmarks.BaseProblem):
             "",
             f"function_indices:{function_id} dimensions:{dimension} instance_indices:{instance_id}",
         )[0]
-
-    # BaseProblem properties
-    @property
-    def search_space(self) -> dict[str, optuna.distributions.BaseDistribution]:
-        """Return the search space."""
-        return {
+        self._search_space = {
             f"x{i}": optuna.distributions.FloatDistribution(
                 low=self._problem.lower_bounds[i],
                 high=self._problem.upper_bounds[i],
             )
             for i in range(self._problem.dimension)
         }
+
+    @property
+    def search_space(self) -> dict[str, optuna.distributions.BaseDistribution]:
+        """Return the search space."""
+        return self._search_space
 
     @property
     def directions(self) -> Sequence[optuna.study.StudyDirection]:
@@ -84,9 +84,12 @@ class Problem(optunahub.benchmarks.BaseProblem):
     def evaluate(self, params: dict[str, float]) -> float:
         """Evaluate the objective function.
         Args:
-            params: Decision variable.
+            params:
+                Decision variable, e.g., evaluate({"x0": 1.0, "x1": 2.0}).
+                The number of parameters must be equal to the dimension of the problem.
         Returns:
             The objective value.
+
         """
         return self._problem(list(params.values()))
 
