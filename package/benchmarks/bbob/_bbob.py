@@ -8,7 +8,7 @@ import optuna
 import optunahub
 
 
-class Problem(optunahub.benchmarks.SimpleBaseProblem):
+class Problem(optunahub.benchmarks.BaseProblem):
     """Wrapper class for COCO bbob test suite.
     https://numbbo.github.io/coco/testsuites/bbob
 
