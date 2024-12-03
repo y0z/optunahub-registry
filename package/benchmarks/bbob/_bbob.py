@@ -91,12 +91,6 @@ class Problem(optunahub.benchmarks.BaseProblem):
         """
         return self._problem(list(params.values()))
 
-    # Additional problem-specific properties
-    @property
-    def coco_problem(self) -> ex.Problem:
-        """Return the COCO problem instance."""
-        return self._problem
-
     def __getattr__(self, name: str) -> Any:
         return getattr(self._problem, name)
 
