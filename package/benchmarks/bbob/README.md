@@ -68,32 +68,32 @@ Please refer to [the paper](https://numbbo.github.io/gforge/downloads/download16
 1. Multi-modal functions with adequate global structure
 1. Multi-modal functions with weak global structure
 
-| Category  | Function ID | Function Name                                            |
-|-----------|-------------|----------------------------------------------------------|
-| 1         | 1           | Sphere Function                                          |
-| 1         | 2           | Separable Ellipsoidal Function                           |
-| 1         | 3           | Rastrigin Function                                       |
-| 1         | 4           | Büche-Rastrigin Function                                 |
-| 1         | 5           | Linear Slope                                             |
-| 2         | 6           | Attractive Sector Function                               |
-| 2         | 7           | Step Ellipsoidal Function                                |
-| 2         | 8           | Rosenbrock Function, original                            |
-| 2         | 9           | Rosenbrock Function, rotated                             |
-| 3         | 10          | Ellipsoidal Function                                     |
-| 3         | 11          | Discus Function                                          |
-| 3         | 12          | Bent Cigar Function                                      |
-| 3         | 13          | Sharp Ridge Function                                     |
-| 3         | 14          | Different Powers Function                                |
-| 4         | 15          | Rastrigin Function                                       |
-| 4         | 16          | Weierstrass Function                                     |
-| 4         | 17          | Schaffer's F7 Function                                   |
-| 4         | 18          | Schaffer's F7 Function, moderately ill-conditioned       |
-| 4         | 19          | Composite Griewank-Rosenbrock Function F8F2              |
-| 5         | 20          | Schwefel Function                                        |
-| 5         | 21          | Gallagher's Gaussian 101-me Peaks Function               |
-| 5         | 22          | Gallagher's Gaussian 21-hi Peaks Function                |
-| 5         | 23          | Katsuura Function                                        |
-| 5         | 24          | Lunacek bi-Rastrigin Function                            |
+| Category  | Function ID | Function Name                                                                                         |
+|-----------|-------------|-------------------------------------------------------------------------------------------------------|
+| 1         | 1           | [Sphere Function](https://numbbo.it/bbob/functions/f01.html)                                          |
+| 1         | 2           | [Separable Ellipsoidal Function](https://numbbo.it/bbob/functions/f02.html)                           |
+| 1         | 3           | [Rastrigin Function](https://numbbo.it/bbob/functions/f03.html)                                       |
+| 1         | 4           | [Büche-Rastrigin Function](https://numbbo.it/bbob/functions/f04.html)                                 |
+| 1         | 5           | [Linear Slope](https://numbbo.it/bbob/functions/f05.html)                                             |
+| 2         | 6           | [Attractive Sector Function](https://numbbo.it/bbob/functions/f06.html)                               |
+| 2         | 7           | [Step Ellipsoidal Function](https://numbbo.it/bbob/functions/f07.html)                                |
+| 2         | 8           | [Rosenbrock Function, original](https://numbbo.it/bbob/functions/f08.html)                            |
+| 2         | 9           | [Rosenbrock Function, rotated](https://numbbo.it/bbob/functions/f09.html)                             |
+| 3         | 10          | [Ellipsoidal Function](https://numbbo.it/bbob/functions/f10.html)                                     |
+| 3         | 11          | [Discus Function](https://numbbo.it/bbob/functions/f11.html)                                          |
+| 3         | 12          | [Bent Cigar Function](https://numbbo.it/bbob/functions/f12.html)                                      |
+| 3         | 13          | [Sharp Ridge Function](https://numbbo.it/bbob/functions/f13.html)                                     |
+| 3         | 14          | [Different Powers Function](https://numbbo.it/bbob/functions/f14.html)                                |
+| 4         | 15          | [Rastrigin Function](https://numbbo.it/bbob/functions/f15.html)                                       |
+| 4         | 16          | [Weierstrass Function](https://numbbo.it/bbob/functions/f16.html)                                     |
+| 4         | 17          | [Schaffer's F7 Function](https://numbbo.it/bbob/functions/f17.html)                                   |
+| 4         | 18          | [Schaffer's F7 Function, moderately ill-conditioned](https://numbbo.it/bbob/functions/f18.html)       |
+| 4         | 19          | [Composite Griewank-Rosenbrock Function F8F2](https://numbbo.it/bbob/functions/f19.html)              |
+| 5         | 20          | [Schwefel Function](https://numbbo.it/bbob/functions/f20.html)                                        |
+| 5         | 21          | [Gallagher's Gaussian 101-me Peaks Function](https://numbbo.it/bbob/functions/f21.html)               |
+| 5         | 22          | [Gallagher's Gaussian 21-hi Peaks Function](https://numbbo.it/bbob/functions/f22.html)                |
+| 5         | 23          | [Katsuura Function](https://numbbo.it/bbob/functions/f23.html)                                        |
+| 5         | 24          | [Lunacek bi-Rastrigin Function](https://numbbo.it/bbob/functions/f24.html)                            |
 
 ![BBOB Plots](images/bbob.png)
 
