@@ -10,7 +10,7 @@ import optunahub
 
 class Problem(optunahub.benchmarks.BaseProblem):
     """Wrapper class for COCO bbob test suite.
-    https://numbbo.github.io/coco/testsuites/bbob
+    https://numbbo.it/bbob/overview.html
 
     1 Separable Functions
         f1: Sphere Function
