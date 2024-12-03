@@ -48,7 +48,7 @@ class Problem(optunahub.benchmarks.BaseProblem):
         Args:
             function_id: Function index in [1, 24].
             dimension: Dimension of the problem in [2, 3, 5, 10, 20, 40].
-            instance_id: Instance index in [1, 15].
+            instance_id: Instance index in [1, 110].
 
         Please refer to the COCO documentation for the details of the available properties.
         https://numbbo.github.io/coco-doc/apidocs/cocoex/cocoex.Problem.html
@@ -56,13 +56,11 @@ class Problem(optunahub.benchmarks.BaseProblem):
 
         assert 1 <= function_id <= 24, "function_id must be in [1, 24]"
         assert dimension in [2, 3, 5, 10, 20, 40], "dimension must be in [2, 3, 5, 10, 20, 40]"
-        assert 1 <= instance_id <= 15, "instance_id must be in [1, 15]"
+        assert 1 <= instance_id <= 110, "instance_id must be in [1, 110]"
 
-        self._problem = ex.Suite(
-            "bbob",
-            "",
-            f"function_indices:{function_id} dimensions:{dimension} instance_indices:{instance_id}",
-        )[0]
+        self._problem = ex.Suite("bbob", "", "").get_problem_by_function_dimension_instance(
+            function=function_id, dimension=dimension, instance=instance_id
+        )
         self._search_space = {
             f"x{i}": optuna.distributions.FloatDistribution(
                 low=self._problem.lower_bounds[i],
@@ -101,3 +99,6 @@ class Problem(optunahub.benchmarks.BaseProblem):
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._problem, name)
+
+    def __del__(self) -> None:
+        self._problem.free()

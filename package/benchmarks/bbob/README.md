@@ -17,7 +17,7 @@ The blackbox optimization benchmarking (bbob) test suite comprises 24 noiseless 
 
 - `function_id`: [ID of the bbob benchmark function](https://numbbo.github.io/coco/testsuites/bbob) to use. It must be in the range of `[1, 24]`.
 - `dimension`: Dimension of the benchmark function. It must be in `[2, 3, 5, 10, 20, 40]`.
-- `instance_id`: ID of the instance of the benchmark function. It must be in the range of `[1, 15]`.
+- `instance_id`: ID of the instance of the benchmark function. It must be in the range of `[1, 110]`.
 
 #### Methods and Properties
 
