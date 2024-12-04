@@ -79,6 +79,4 @@ Please refer to [the paper](https://numbbo.github.io/coco-doc/bbob-constrained/f
 
 ## Reference
 
-```
 Paul Dufossé, Nikolaus Hansen, Dimo Brockhoff, Phillipe R. Sampaio, Asma Atamna, and Anne Auger. [Building scalable test problems for benchmarking constrained optimizers. 2022. To be submitted to the SIAM Journal of Optimization](https://numbbo.github.io/coco-doc/bbob-constrained/functions.pdf).
-```
