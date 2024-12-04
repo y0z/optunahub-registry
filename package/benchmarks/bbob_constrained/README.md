@@ -76,7 +76,7 @@ except Exception as e:
     print(e)
 ```
 
-## List of Benchmark Functions
+## Details of Benchmark Functions
 
 Please refer to [the paper](https://numbbo.github.io/coco-doc/bbob-constrained/functions.pdf) for details about each benchmark function.
 
