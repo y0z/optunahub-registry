@@ -27,7 +27,7 @@ The blackbox optimization benchmarking (bbob) test suite comprises 24 noiseless 
   - Return type: `list[optuna.study.StudyDirection]`
 - `__call__(trial: optuna.Trial)`: Evaluate the objective function and return the objective value.
   - Parameters:
-    - `trial`: trial: Optuna trial object.
+    - `trial`: Optuna trial object.
   - Return type: `float`
 - `evaluate(params: dict[str, float])`: Evaluate the objective function.
   - Parameters:
