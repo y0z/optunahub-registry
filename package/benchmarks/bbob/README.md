@@ -23,8 +23,12 @@ The blackbox optimization benchmarking (bbob) test suite comprises 24 noiseless 
 
 - `search_space`: Return the search space.
   - Return type: `dict[str, optuna.distributions.BaseDistribution]`
-- `direction`: Return the optimization direction.
-  - Return type: `optuna.study.StudyDirection`
+- `directions`: Return the optimization directions.
+  - Return type: `list[optuna.study.StudyDirection]`
+- `__call__(trial: optuna.Trial)`: Evaluate the objective function and return the objective value.
+  - Parameters:
+    - `trial`: trial: Optuna trial object.
+  - Return type: `float`
 - `evaluate(params: dict[str, float])`: Evaluate the objective function.
   - Parameters:
     - `params`: Decision variable like `{"x0": x1_value, "x1": x1_value, ..., "xn": xn_value}`. The number of parameters must be equal to `dimension`.
@@ -50,7 +54,7 @@ import optunahub
 bbob = optunahub.load_module("benchmarks/bbob")
 sphere2d = bbob.Problem(function_id=1, dimension=2, instance_id=1)
 
-study = optuna.create_study(direction=sphere2d.direction)
+study = optuna.create_study(directions=sphere2d.directions)
 study.optimize(sphere2d, n_trials=20)
 
 print(study.best_trial.params, study.best_trial.value)
