@@ -1,5 +1,7 @@
-# Hard copy of https://github.com/ryojitanabe/reproblems/blob/master/reproblem_python_ver/reproblem.py
 """
+This code is taken from reproblem (https://github.com/ryojitanabe/reproblems) distributed under
+the MIT License.
+
 A real-world multi-objective problem suite (the RE benchmark set)
 Reference:
 Ryoji Tanabe, Hisao Ishibuchi, "An Easy-to-use Real-world Multi-objective Problem Suite" Applied Soft Computing. 89: 106078 (2020)
