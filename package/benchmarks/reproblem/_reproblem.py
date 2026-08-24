@@ -16,6 +16,7 @@ class BaseUnconstrainedREBenchmark(Protocol):
     problem_name: str
     n_objectives: int  # Number of objectives
     n_variables: int  # Number of parameters
+    n_original_constraints: int  # Number of constraints folded into the objectives
     lbound: np.ndarray  # Lower bound of each parameter
     ubound: np.ndarray  # Upper bound of each parameter
 
@@ -89,7 +90,7 @@ class _ProblemInfo(NamedTuple):
     unconstrained_name: str
     constrained_name: str | None  # `None` when the suite has no constrained counterpart.
     objective_names: tuple[str, ...]  # The original objectives shared by both problems.
-    constraint_indices: tuple[int, ...]  # The `g_j` indices in the order `evaluate` returns them.
+    constraint_names: tuple[str, ...]  # The constraints in the order `evaluate` returns them.
 
 
 # Table 1 of the paper (https://arxiv.org/abs/2009.12867) derives an unconstrained problem and its
@@ -102,6 +103,14 @@ class _ProblemInfo(NamedTuple):
 # file (https://github.com/ryojitanabe/reproblems/blob/master/doc/re-supplementary_file.pdf), and
 # `negative_` is prefixed to the quantities that the paper maximizes, because the original
 # implementation negates them so that every objective is minimized.
+# The constraint names carry the `g_j` index the same way and are listed in the order the original
+# implementation returns them, which is not sorted by `j` for the conceptual marine design problem.
+# Neither the paper nor the supplementary file names a constraint, so the descriptive part of each
+# name is read off the constraint formula together with the original reference that the paper cites
+# for that problem. The water resource planning problem is the one exception: its constraints are
+# regression surrogates that bound quantities the reference leaves unnamed, so they keep the bare
+# `g_j` index. The constraint names of a problem without a constrained counterpart document what its
+# aggregated violation objective sums up, because only `ConstrainedProblem` exposes them as names.
 _PROBLEM_INFO_TABLE: list[_ProblemInfo] = [
     _ProblemInfo(
         "FourBarTruss",
@@ -110,30 +119,77 @@ _PROBLEM_INFO_TABLE: list[_ProblemInfo] = [
         ("f1_structural_volume", "f2_joint_displacement"),
         (),
     ),
-    _ProblemInfo("ReinforcedConcreteBeam", "RE22", None, ("f1_total_cost",), (1, 2)),
-    _ProblemInfo("PressureVessel", "RE23", None, ("f1_total_cost",), (1, 2, 3)),
-    _ProblemInfo("HatchCover", "RE24", None, ("f1_weight",), (1, 2, 3, 4)),
-    _ProblemInfo("CoilCompressionSpring", "RE25", None, ("f1_volume",), (1, 2, 3, 4, 5, 6)),
+    _ProblemInfo(
+        "ReinforcedConcreteBeam",
+        "RE22",
+        None,
+        ("f1_total_cost",),
+        ("g1_flexural_capacity", "g2_depth_to_width_ratio"),
+    ),
+    _ProblemInfo(
+        "PressureVessel",
+        "RE23",
+        None,
+        ("f1_total_cost",),
+        ("g1_shell_thickness", "g2_head_thickness", "g3_working_volume"),
+    ),
+    _ProblemInfo(
+        "HatchCover",
+        "RE24",
+        None,
+        ("f1_weight",),
+        ("g1_bending_stress", "g2_shear_stress", "g3_deflection", "g4_buckling_stress"),
+    ),
+    _ProblemInfo(
+        "CoilCompressionSpring",
+        "RE25",
+        None,
+        ("f1_volume",),
+        (
+            "g1_shear_stress",
+            "g2_free_length",
+            "g3_coil_to_wire_diameter_ratio",
+            "g4_deflection_under_preload",
+            "g5_combined_deflection_clearance",
+            "g6_working_deflection",
+        ),
+    ),
+    # `x1` and `x2` are the cross sectional areas of the members AC and BC, and `g2` and `g3` bound
+    # the stress of the respective member by the same 1e5 kPa limit, while `g1` bounds `f1`.
+    # `f2` is therefore the stress of the member AC rather than a joint displacement: it is the very
+    # quantity `g2` bounds, and a displacement would not share a limit with the stress in `g3`.
+    # Coello and Pulido (2005), which the paper cites for this problem, likewise gives the two
+    # objectives as the volume of the truss and the stress of the member AC.
     _ProblemInfo(
         "TwoBarTruss",
         "RE31",
         "CRE21",
-        ("f1_structural_weight", "f2_resultant_joint_displacement"),
-        (1, 2, 3),
+        ("f1_structural_weight", "f2_member_ac_stress"),
+        ("g1_structural_weight", "g2_member_ac_stress", "g3_member_bc_stress"),
     ),
     _ProblemInfo(
         "WeldedBeam",
         "RE32",
         "CRE22",
         ("f1_cost", "f2_end_deflection"),
-        (1, 2, 3, 4),
+        (
+            "g1_weld_shear_stress",
+            "g2_beam_bending_stress",
+            "g3_geometric_side",
+            "g4_buckling_load",
+        ),
     ),
     _ProblemInfo(
         "DiscBrake",
         "RE33",
         "CRE23",
         ("f1_brake_mass", "f2_minimum_stopping_time"),
-        (1, 2, 3, 4),
+        (
+            "g1_minimum_radial_thickness",
+            "g2_maximum_actuating_pressure",
+            "g3_maximum_temperature",
+            "g4_minimum_braking_torque",
+        ),
     ),
     _ProblemInfo(
         "VehicleCrashworthiness",
@@ -142,19 +198,34 @@ _PROBLEM_INFO_TABLE: list[_ProblemInfo] = [
         ("f1_weight", "f2_acceleration_characteristics", "f3_toe_board_intrusion"),
         (),
     ),
+    # `x1` is the gear face width, `x2` the tooth module, `x3` the number of teeth of the pinion,
+    # `x4` and `x5` the shaft lengths between the bearings, and `x6` and `x7` the shaft diameters,
+    # so `g5` to `g9` are the dimensional restrictions and `g10` and `g11` the shaft stresses.
     _ProblemInfo(
         "SpeedReducer",
         "RE35",
         "CRE24",
         ("f1_volume", "f2_gear_shaft_stress"),
-        (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+        (
+            "g1_gear_tooth_bending_stress",
+            "g2_gear_tooth_contact_stress",
+            "g3_shaft1_transverse_deflection",
+            "g4_shaft2_transverse_deflection",
+            "g5_pinion_pitch_diameter",
+            "g6_maximum_face_width_to_module",
+            "g7_minimum_face_width_to_module",
+            "g8_shaft1_length_clearance",
+            "g9_shaft2_length_clearance",
+            "g10_shaft1_stress",
+            "g11_shaft2_stress",
+        ),
     ),
     _ProblemInfo(
         "GearTrain",
         "RE36",
         "CRE25",
         ("f1_gear_ratio_error", "f2_max_gear_size"),
-        (1,),
+        ("g1_gear_ratio_error",),
     ),
     _ProblemInfo(
         "RocketInjector",
@@ -172,10 +243,22 @@ _PROBLEM_INFO_TABLE: list[_ProblemInfo] = [
         "RE41",
         "CRE31",
         ("f1_car_weight", "f2_pubic_force", "f3_v_pillar_average_velocity"),
-        (1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+        (
+            "g1_abdomen_load",
+            "g2_upper_viscous_criterion",
+            "g3_middle_viscous_criterion",
+            "g4_lower_viscous_criterion",
+            "g5_upper_rib_deflection",
+            "g6_middle_rib_deflection",
+            "g7_lower_rib_deflection",
+            "g8_pubic_symphysis_force",
+            "g9_b_pillar_velocity",
+            "g10_front_door_velocity",
+        ),
     ),
     # The original implementation of the conceptual marine design problem returns the seventh
-    # constraint before the sixth one, so `constraint_indices` is not sorted for this pair.
+    # constraint before the sixth one, so `constraint_names` is not sorted for this pair. The two
+    # are the halves of the single two-sided bound `3000 <= DWT <= 500000` on the deadweight.
     _ProblemInfo(
         "ConceptualMarine",
         "RE42",
@@ -185,7 +268,17 @@ _PROBLEM_INFO_TABLE: list[_ProblemInfo] = [
             "f2_light_ship_weight",
             "f3_negative_annual_cargo_transport_capacity",
         ),
-        (1, 2, 3, 4, 5, 7, 6, 8, 9),
+        (
+            "g1_length_to_beam_ratio",
+            "g2_length_to_depth_ratio",
+            "g3_length_to_draught_ratio",
+            "g4_draught_to_deadweight",
+            "g5_draught_to_depth",
+            "g7_maximum_deadweight",
+            "g6_minimum_deadweight",
+            "g8_froude_number",
+            "g9_metacentric_height",
+        ),
     ),
     _ProblemInfo(
         "WaterResourcePlanning",
@@ -198,7 +291,7 @@ _PROBLEM_INFO_TABLE: list[_ProblemInfo] = [
             "f4_expected_flood_damage_cost",
             "f5_expected_economic_loss_due_to_flood",
         ),
-        (1, 2, 3, 4, 5, 6, 7),
+        ("g1", "g2", "g3", "g4", "g5", "g6", "g7"),
     ),
     # Unlike the other problems, the car cab design problem keeps each folded constraint as its own
     # objective instead of aggregating them, so its violation objectives are named individually.
@@ -218,6 +311,12 @@ _ORIGINAL_NAMES: dict[str, str] = {
     if problem_name is not None
 }
 
+# The constraints that the unconstrained problem folds into its violation objective. They are not
+# exposed as names, so this is only used to validate the table against the original implementation.
+_FOLDED_CONSTRAINT_NAMES: dict[str, tuple[str, ...]] = {
+    info.unconstrained_name: info.constraint_names for info in _PROBLEM_INFO_TABLE
+}
+
 
 def _build_name_tables() -> tuple[dict[str, tuple[str, ...]], dict[str, tuple[str, ...]]]:
     """Map every problem name to its objective names and, if constrained, its constraint names."""
@@ -225,7 +324,7 @@ def _build_name_tables() -> tuple[dict[str, tuple[str, ...]], dict[str, tuple[st
     constraint_names: dict[str, tuple[str, ...]] = {}
     for info in _PROBLEM_INFO_TABLE:
         objective_names = info.objective_names
-        if info.constraint_indices:
+        if info.constraint_names:
             index = len(objective_names) + 1
             objective_names += (f"f{index}_{_TOTAL_CONSTRAINT_VIOLATION}",)
 
@@ -236,9 +335,7 @@ def _build_name_tables() -> tuple[dict[str, tuple[str, ...]], dict[str, tuple[st
         # The constrained counterpart exposes the constraints instead of folding them in, so it
         # keeps only the original objectives.
         metric_names[info.constrained_name] = info.objective_names
-        constraint_names[info.constrained_name] = tuple(
-            f"g{index}" for index in info.constraint_indices
-        )
+        constraint_names[info.constrained_name] = info.constraint_names
 
     return metric_names, constraint_names
 
@@ -273,6 +370,11 @@ class Problem(optunahub.benchmarks.BaseProblem):
         n_objectives = self._problem.n_objectives
         assert len(self._metric_names) == n_objectives, (
             f"{problem_name} must have {n_objectives} objectives."
+        )
+
+        n_folded_constraints = self._problem.n_original_constraints
+        assert len(_FOLDED_CONSTRAINT_NAMES[problem_name]) == n_folded_constraints, (
+            f"{problem_name} must fold {n_folded_constraints} constraints into its objectives."
         )
 
     @property
