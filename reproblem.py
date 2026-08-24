@@ -1702,25 +1702,3 @@ class CRE51:
         g = np.where(g < 0, -g, 0)
 
         return f, g
-
-
-if __name__ == "__main__":
-    np.random.seed(seed=1)
-    fun = RE21()
-
-    x = fun.lbound + (fun.ubound - fun.lbound) * np.random.rand(fun.n_variables)
-    print("Problem = {}".format(fun.problem_name))
-    print("Number of objectives = {}".format(fun.n_objectives))
-    print("Number of variables = {}".format(fun.n_variables))
-    print("Number of constraints = {}".format(fun.n_constraints))
-    print("Lower bounds = ", fun.lbound)
-    print("Upper bounds = ", fun.ubound)
-    print("x = ", x)
-
-    if "CRE" in fun.problem_name:
-        f, g = fun.evaluate(x)
-        print("f(x) = {}".format(f))
-        print("g(x) = {}".format(g))
-    else:
-        f = fun.evaluate(x)
-        print("f(x) = {}".format(f))
