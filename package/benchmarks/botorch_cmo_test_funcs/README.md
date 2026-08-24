@@ -24,33 +24,53 @@ Each problem is reimplemented with plain Python and `numpy` only, so it can be e
 All 6 classes below share the same interface, inherited from `optunahub.benchmarks.BaseProblem`:
 
 - `search_space`: Return the search space.
+
   - Returns: `dict[str, optuna.distributions.BaseDistribution]`
+
 - `directions`: Return the optimization directions. Always `[MINIMIZE, MINIMIZE]` for every problem in this package.
+
   - Returns: `list[optuna.study.StudyDirection]`
+
 - `__call__(trial: optuna.Trial)`: Evaluate the objectives and constraints and return the objective values.
+
   - Args:
     - `trial`: Optuna trial object.
   - Returns: `list[float]`
+
 - `evaluate(params: dict[str, float])`: Evaluate the objective functions.
+
   - Args:
     - `params`: Decision variable like `{"x0": x0_value, "x1": x1_value, ..., "xn": xn_value}`.
   - Returns: `list[float]` of length 2.
+
 - `evaluate_constraints(params: dict[str, float])`: Evaluate the constraint functions.
+
   - Args:
     - `params`: Decision variable, same format as `evaluate`.
   - Returns: `dict[str, float]` keyed by `c0`, `c1`, .... A trial is feasible when every value is zero or less.
 
 - `BNH()`
+
   - Dimension: 2. Constraints: 2. See [GarridoMerchan2020]\_.
+
 - `CONSTR()`
+
   - Dimension: 2. Constraints: 2. See [GarridoMerchan2020]\_.
+
 - `ConstrainedBraninCurrin()`
+
   - Dimension: 2. Constraints: 1. The Branin-Currin function with the disk constraint from [Gelbart2014]\_.
+
 - `OSY()`
+
   - Dimension: 6. Constraints: 6. See [Oszycka1995]\_.
+
 - `SRN()`
+
   - Dimension: 2. Constraints: 2. See [GarridoMerchan2020]\_.
+
 - `MW7(dim: int)`
+
   - `dim`: Number of decision variables. Must be at least 2.
   - Dimension: `dim`. Constraints: 2. Disconnected Pareto front. See [Ma2019]\_.
 
