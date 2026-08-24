@@ -18,6 +18,7 @@ Note that `ConstrainedProblem` relies on `optuna.trial.Trial.set_constraint`, wh
 ## APIs
 
 - `Problem(problem_name: str)`
+
   - `problem_name`: The name of an unconstrained benchmark problem. Available names are `RE21`, `RE22`, `RE23`, `RE24`, `RE25`, `RE31`, `RE32`, `RE33`, `RE34`, `RE35`, `RE36`, `RE37`, `RE41`, `RE42`, `RE61`, and `RE91`. Note that some of these problems internally reformulate their original constraints into an additional penalty objective, so they remain unconstrained from Optuna's perspective.
   - Attributes:
     - `search_space`: Return the search space.
@@ -34,6 +35,7 @@ Note that `ConstrainedProblem` relies on `optuna.trial.Trial.set_constraint`, wh
       - Returns: List of length `self.n_objectives`.
 
 - `ConstrainedProblem(problem_name: str)`
+
   - `problem_name`: The name of a constrained benchmark problem. Available names are `CRE21`, `CRE22`, `CRE23`, `CRE24`, `CRE25`, `CRE31`, `CRE32`, and `CRE51`.
   - Attributes:
     - `search_space`: Return the search space.
