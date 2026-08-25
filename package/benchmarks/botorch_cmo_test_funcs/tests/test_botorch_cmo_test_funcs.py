@@ -9,8 +9,8 @@ is checked against the *negated* recorded slacks.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
 from typing import Protocol
+from typing import TYPE_CHECKING
 
 from golden import GOLDEN
 from optuna.distributions import FloatDistribution
@@ -45,6 +45,7 @@ class _ConstrainedProblem(Protocol):
     def evaluate(self, params: dict[str, float]) -> Sequence[float]: ...
 
     def evaluate_constraints(self, params: dict[str, float]) -> dict[str, float]: ...
+
 
 # ``cls`` here is the OptunaHub wrapper class name, which matches the BoTorch
 # class name in ``golden.json`` for every problem except ``MW7``, which is
