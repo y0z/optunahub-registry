@@ -362,7 +362,7 @@ class Problem(optunahub.benchmarks.BaseProblem):
 
         self._problem = unconstrained_problems[problem_name]()
 
-        self._search_space: dict[str, BaseDistribution] = {
+        self._search_space: dict[str, optuna.distributions.BaseDistribution] = {
             f"x{i}": optuna.distributions.FloatDistribution(low, high)
             for i, (low, high) in enumerate(zip(self._problem.lbound, self._problem.ubound))
         }
