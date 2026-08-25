@@ -1,4 +1,32 @@
-r"""OptunaHub ``BaseProblem`` wrappers for 6 of the problems from ``botorch``.
+"""
+This code is taken from botorch (https://github.com/meta-pytorch/botorch/blob/main/botorch/test_functions/multi_objective.py)
+distributed under the MIT License.
+
+MIT License
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+OptunaHub ``BaseProblem`` wrappers for 6 of the problems from ``botorch``.
 
 ``ConstrainedBraninCurrin`` and ``MW7`` read their inputs as ``numpy.float64``
 rather than plain ``float``: both have a division that is well-defined at a
@@ -25,7 +53,7 @@ Conventions
   ``ref_point``/hypervolume convention, not about the sign of ``f0`` itself.
   So this wrapper uses the raw values unchanged with
   ``directions=[MINIMIZE, MINIMIZE]``.
-"""
+"""  # NOQA
 
 from __future__ import annotations
 
@@ -47,7 +75,7 @@ def _box_search_space(bounds: list[tuple[float, float]]) -> dict[str, BaseDistri
 
 
 class BNH(BaseProblem):
-    r"""The constrained BNH problem. See [GarridoMerchan2020]_. Minimization."""
+    """The constrained BNH problem. See [GarridoMerchan2020]_. Minimization."""
 
     _bounds = [(0.0, 5.0), (0.0, 3.0)]
 
@@ -73,7 +101,7 @@ class BNH(BaseProblem):
 
 
 class CONSTR(BaseProblem):
-    r"""The constrained CONSTR problem. See [GarridoMerchan2020]_. Minimization."""
+    """The constrained CONSTR problem. See [GarridoMerchan2020]_. Minimization."""
 
     _bounds = [(0.1, 10.0), (0.0, 5.0)]
 
@@ -99,7 +127,7 @@ class CONSTR(BaseProblem):
 
 
 class ConstrainedBraninCurrin(BaseProblem):
-    r"""Constrained Branin Currin Function, with the disk constraint
+    """Constrained Branin Currin Function, with the disk constraint
     from [Gelbart2014]_.
 
     The constraint's affine transform (``_con_bounds = [(-5, 10), (0, 15)]``,
@@ -142,7 +170,7 @@ class ConstrainedBraninCurrin(BaseProblem):
 
 
 class OSY(BaseProblem):
-    r"""The OSY test problem from [Oszycka1995]_, using the original
+    """The OSY test problem from [Oszycka1995]_, using the original
     minimization-form objectives verbatim (see module docstring)."""
 
     _bounds = [(0.0, 10.0), (0.0, 10.0), (1.0, 5.0), (0.0, 6.0), (1.0, 5.0), (0.0, 10.0)]
@@ -173,7 +201,7 @@ class OSY(BaseProblem):
 
 
 class SRN(BaseProblem):
-    r"""The constrained SRN problem. See [GarridoMerchan2020]_. Minimization."""
+    """The constrained SRN problem. See [GarridoMerchan2020]_. Minimization."""
 
     _bounds = [(-20.0, 20.0), (-20.0, 20.0)]
 
@@ -199,7 +227,7 @@ class SRN(BaseProblem):
 
 
 class MW7(BaseProblem):
-    r"""The MW7 problem: 2 objectives, 2 constraints, disconnected Pareto front.
+    """The MW7 problem: 2 objectives, 2 constraints, disconnected Pareto front.
 
     Supports arbitrary input dimension > 1. See [Ma2019]_ for details.
     """

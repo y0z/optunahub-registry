@@ -51,28 +51,28 @@ All 6 classes below share the same interface, inherited from `optunahub.benchmar
 
 - `BNH()`
 
-  - Dimension: 2. Constraints: 2. See [GarridoMerchan2020]\_.
+  - Dimension: 2. Constraints: 2. See (Garrido-Merchán & Hernández-Lobato, 2019).
 
 - `CONSTR()`
 
-  - Dimension: 2. Constraints: 2. See [GarridoMerchan2020]\_.
+  - Dimension: 2. Constraints: 2. See (Garrido-Merchán & Hernández-Lobato, 2019).
 
 - `ConstrainedBraninCurrin()`
 
-  - Dimension: 2. Constraints: 1. The Branin-Currin function with the disk constraint from [Gelbart2014]\_.
+  - Dimension: 2. Constraints: 1. The Branin-Currin function with the disk constraint from (Gelbart et al., 2014).
 
 - `OSY()`
 
-  - Dimension: 6. Constraints: 6. See [Oszycka1995]\_.
+  - Dimension: 6. Constraints: 6. See (Osyczka & Kundu, 1995).
 
 - `SRN()`
 
-  - Dimension: 2. Constraints: 2. See [GarridoMerchan2020]\_.
+  - Dimension: 2. Constraints: 2. See (Garrido-Merchán & Hernández-Lobato, 2019).
 
 - `MW7(dim: int)`
 
   - `dim`: Number of decision variables. Must be at least 2.
-  - Dimension: `dim`. Constraints: 2. Disconnected Pareto front. See [Ma2019]\_.
+  - Dimension: `dim`. Constraints: 2. Disconnected Pareto front. See (Ma & Wang, 2019).
 
 ## Example
 

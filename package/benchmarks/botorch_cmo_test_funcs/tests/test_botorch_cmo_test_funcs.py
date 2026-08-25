@@ -8,11 +8,19 @@ is checked against the *negated* recorded slacks.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
+from typing import Protocol
+
 from golden import GOLDEN
+from optuna.distributions import FloatDistribution
 from optuna.study import StudyDirection
 import optunahub
-from optunahub.benchmarks import BaseProblem
 import pytest
+
+
+if TYPE_CHECKING:
+    from _pytest.mark.structures import ParameterSet
 
 
 ob = optunahub.load_local_module(
@@ -21,6 +29,22 @@ ob = optunahub.load_local_module(
 
 RTOL = 1e-9
 ATOL = 1e-9
+
+
+class _ConstrainedProblem(Protocol):
+    """Structural type for the ``BaseProblem`` subclasses under test.
+
+    ``BaseProblem`` itself declares neither ``evaluate_constraints`` nor a
+    ``Sequence[float]``-typed ``evaluate``/``FloatDistribution``-valued
+    ``search_space``; every problem in ``SPECS`` provides all three.
+    """
+
+    directions: list[StudyDirection]
+    search_space: dict[str, FloatDistribution]
+
+    def evaluate(self, params: dict[str, float]) -> Sequence[float]: ...
+
+    def evaluate_constraints(self, params: dict[str, float]) -> dict[str, float]: ...
 
 # ``cls`` here is the OptunaHub wrapper class name, which matches the BoTorch
 # class name in ``golden.json`` for every problem except ``MW7``, which is
@@ -36,7 +60,7 @@ SPECS = [
 ]
 
 
-def build(cls_name: str, init_kwargs: dict) -> BaseProblem:
+def build(cls_name: str, init_kwargs: dict) -> _ConstrainedProblem:
     return getattr(ob, cls_name)(**init_kwargs)
 
 
@@ -44,7 +68,7 @@ def as_params(X: list[float]) -> dict[str, float]:
     return {f"x{i}": value for i, value in enumerate(X)}
 
 
-def case_ids(golden_key: str) -> list[pytest.param]:
+def case_ids(golden_key: str) -> list[ParameterSet]:
     return [
         pytest.param(golden_key, index, id=f"{golden_key}-{case['name']}")
         for index, case in enumerate(GOLDEN[golden_key]["cases"])
